@@ -3,8 +3,18 @@
 #include <ESPAsyncWebServer.h>
 #include <ArduinoOTA.h>
 
-const char* ssid = "REDE";
-const char* password = "SENHA";
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+
+const String Version = "0.1.1"; 
+const char* ssid = "GABRIEL";
+const char* password = "99514334";
+
+const char *servidorNTP = "a.st1.ntp.br"; // Servidor NTP para pesquisar a hora
+const int fusoHorario = -10800;           // Fuso horário em segundos (-03h = -10800 seg)
+const int taxaDeAtualizacao = 1800000;    // Taxa de atualização do servidor NTP em milisegundos
+WiFiUDP ntpUDP; // Declaração do Protocolo UDP
+NTPClient timeClient(ntpUDP, servidorNTP, fusoHorario, 60000);
 
 bool ledState = 0;
 const char ledPin = 2;
@@ -202,20 +212,19 @@ void setup(){
     else if (error == OTA_END_ERROR) Serial.println("End Failed");
   });
   ArduinoOTA.begin();
-
-  
   Serial.begin(115200);
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
-  
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting to WiFi.. 2");
   }
-
   Serial.println(WiFi.localIP());
-
+  timeClient.begin();
+  timeClient.update();
+  Serial.print("Horario atualizado: ");
+  Serial.println(timeClient.getFormattedTime());
   initWebSocket();
 
   // Route for root / web page

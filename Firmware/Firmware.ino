@@ -4,7 +4,7 @@
 #include <ArduinoOTA.h>
 #include <NTPClient.h>
 
-String Version = "0.1" 
+const String Version = "0.1"; 
 #define WIFI_SSID "GABRIEL"
 #define WIFI_PASSWORD "99514334"
 
@@ -31,7 +31,7 @@ void setup() {
   timeClient.begin();
   timeClient.update();
   Serial.println("Horario atualizado!");
-  Serial.println(timeClient.getFormattedTimeanddate());
+  //Serial.println(timeClient.getFormattedTimeanddate());
 
   // Port defaults to 3232
   // ArduinoOTA.setPort(3232);
