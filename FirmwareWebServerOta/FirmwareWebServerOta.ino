@@ -3,6 +3,7 @@
 #include <ESPAsyncWebServer.h>
 #include <ArduinoOTA.h>
 #include "WebPage.h"
+#include "./System.h"
 
 //Configuração da rede
 const char* ssid = "Oliveira oi fibra";
@@ -80,7 +81,8 @@ String Processor(const String& var)
 
 void setup()
 {
-	Serial.begin(115200);
+	//Setup da serial
+	InitSerial();
   
 	//Setup ESP
 	pinMode(ledPin, OUTPUT);
@@ -135,6 +137,11 @@ void setup()
 
 	//Iniciando o servidor
 	server.begin();
+	
+	//Executa o setup dos pinos
+	InitPinMode();
+	//Inicia o contador das tasks
+	InitCountdown();
 }
 
 void loop()
@@ -147,4 +154,7 @@ void loop()
 	
 	//Atualiza o led
 	digitalWrite(ledPin, !ledState);
+	
+	//Executa o gerenciamento das tasks
+	HandleTasks();
 }
