@@ -2,233 +2,149 @@
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoOTA.h>
+#include "WebPage.h"
 
-const char* ssid = "REDE";
-const char* password = "SENHA";
+//Configuração da rede
+const char* ssid = "Oliveira oi fibra";
+const char* password = "23121998";
 
-bool ledState = 0;
+bool ledState = LOW;
 const char ledPin = 2;
 
-// Create AsyncWebServer object on port 80
+//Configuração do web server (porta 80)
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-const char index_html[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML><html>
-<head>
-  <title>ESP Web Server</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <style>
-  html {
-    font-family: Arial, Helvetica, sans-serif;
-    text-align: center;
-  }
-  h1 {
-    font-size: 1.8rem;
-    color: white;
-  }
-  h2{
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #143642;
-  }
-  .topnav {
-    overflow: hidden;
-    background-color: #143642;
-  }
-  body {
-    margin: 0;
-  }
-  .content {
-    padding: 30px;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  .card {
-    background-color: #F8F7F9;;
-    box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
-    padding-top:10px;
-    padding-bottom:20px;
-  }
-  .button {
-    padding: 15px 50px;
-    font-size: 24px;
-    text-align: center;
-    outline: none;
-    color: #fff;
-    background-color: #0f8b8d;
-    border: none;
-    border-radius: 5px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-   }
-   /*.button:hover {background-color: #0f8b8d}*/
-   .button:active {
-     background-color: #0f8b8d;
-     box-shadow: 2 2px #CDCDCD;
-     transform: translateY(2px);
-   }
-   .state {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-   }
-  </style>
-<title>ESP Web Server</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="data:,">
-</head>
-<body>
-  <div class="topnav">
-    <h1>ESP WebSocket Server</h1>
-  </div>
-  <div class="content">
-    <div class="card">
-      <h2>Output - GPIO</h2>
-      <p class="state">state: <span id="state">%STATE%</span></p>
-      <p><button id="button" class="button">Toggle</button></p>
-    </div>
-  </div>
-<script>
-  var gateway = `ws://${window.location.hostname}/ws`;
-  var websocket;
-  window.addEventListener('load', onLoad);
-  function initWebSocket() {
-    console.log('Trying to open a WebSocket connection...');
-    websocket = new WebSocket(gateway);
-    websocket.onopen    = onOpen;
-    websocket.onclose   = onClose;
-    websocket.onmessage = onMessage; // <-- add this line
-  }
-  function onOpen(event) {
-    console.log('Connection opened');
-  }
-  function onClose(event) {
-    console.log('Connection closed');
-    setTimeout(initWebSocket, 2000);
-  }
-  function onMessage(event) {
-    var state;
-    if (event.data == "1"){
-      state = "ON";
-    }
-    else{
-      state = "OFF";
-    }
-    document.getElementById('state').innerHTML = state;
-  }
-  function onLoad(event) {
-    initWebSocket();
-    initButton();
-  }
-  function initButton() {
-    document.getElementById('button').addEventListener('click', toggle);
-  }
-  function toggle(){
-    websocket.send('toggle');
-  }
-</script>
-</body>
-</html>
-)rawliteral";
-
-void notifyClients() {
-  ws.textAll(String(ledState));
+//Envia para todos os clientes o estado atual
+void NotifyClients()
+{
+	ws.textAll(String(ledState));
 }
 
-void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
-  AwsFrameInfo *info = (AwsFrameInfo*)arg;
-  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-    data[len] = 0;
-    if (strcmp((char*)data, "toggle") == 0) {
-      ledState = !ledState;
-      notifyClients();
-    }
-  }
+//Gerencia os comandos recebidos pelo web socket
+void HandleWebSocketMessage(void *arg, uint8_t *data, size_t len)
+{
+	AwsFrameInfo *info = (AwsFrameInfo*)arg;
+	if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
+	{
+		data[len] = 0;
+		//Se o comando for toggle, muda o estado do led e notifica todos os clientes
+		if (strcmp((char*)data, "toggle") == 0)
+		{
+			ledState = !ledState;
+			NotifyClients();
+		}
+	}
 }
 
-void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
-             void *arg, uint8_t *data, size_t len) {
-    switch (type) {
-      case WS_EVT_CONNECT:
-        Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-        break;
-      case WS_EVT_DISCONNECT:
-        Serial.printf("WebSocket client #%u disconnected\n", client->id());
-        break;
-      case WS_EVT_DATA:
-        handleWebSocketMessage(arg, data, len);
-        break;
-      case WS_EVT_PONG:
-      case WS_EVT_ERROR:
-        break;
-  }
+//Eventos do web socket
+void OnEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
+{
+	switch (type)
+	{
+		case WS_EVT_CONNECT:
+			Serial.printf("[WebSocket] Cliente #%u conectado %s\n", client->id(), client->remoteIP().toString().c_str());
+			//Sempre que um cliente é conectado notifica o estado pra ele
+			NotifyClients();
+			break;
+		case WS_EVT_DISCONNECT:
+			Serial.printf("[WebSocket] Cliente #%u desconectado\n", client->id());
+			break;
+		case WS_EVT_DATA:
+			HandleWebSocketMessage(arg, data, len);
+			break;
+		case WS_EVT_PONG:
+			break;
+		case WS_EVT_ERROR:
+			break;
+	}
 }
 
-void initWebSocket() {
-  ws.onEvent(onEvent);
-  server.addHandler(&ws);
+//Setup do web socket
+void InitWebSocket()
+{
+	ws.onEvent(OnEvent);
+	server.addHandler(&ws);
 }
 
-String processor(const String& var){
-  Serial.println(var);
-  if(var == "STATE"){
-    if (ledState){
-      return "ON";
-    }
-    else{
-      return "OFF";
-    }
-  }
+String Processor(const String& var)
+{
+	if(var == "STATE")
+	{
+		if (ledState)
+			return "ON";
+		else
+			return "OFF";
+	}
 }
 
-void setup(){
-  ArduinoOTA.onStart([]() {Serial.println("Start");});
-  ArduinoOTA.onEnd([]() {Serial.println("\nEnd");});
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100))); });
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  });
-  ArduinoOTA.begin();
-
+void setup()
+{
+	Serial.begin(115200);
   
-  Serial.begin(115200);
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
+	//Setup ESP
+	pinMode(ledPin, OUTPUT);
   
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.println("Connecting to WiFi.. 2");
-  }
+	ArduinoOTA.onStart([]() 
+	{
+		Serial.println("[OTA] Iniciado");
+	});
+	ArduinoOTA.onEnd([]()
+	{
+		Serial.println("[OTA] Finalizado");
+	});
+	ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+	{
+		Serial.printf("\n[OTA] Progresso: %u%%\r", (progress / (total / 100))); 
+	});
+	ArduinoOTA.onError([](ota_error_t error)
+	{
+		Serial.printf("\n[OTA] Erro[%u]: ", error);
+		if (error == OTA_AUTH_ERROR)
+			Serial.println("[OTA] Falha na autenticaçao");
+		else if (error == OTA_BEGIN_ERROR)
+			Serial.println("[OTA] Falha ao iniciar");
+		else if (error == OTA_CONNECT_ERROR)
+			Serial.println("[OTA] Falha ao conectar");
+		else if (error == OTA_RECEIVE_ERROR)
+			Serial.println("[OTA] Falha ao receber os dados");
+		else if (error == OTA_END_ERROR)
+			Serial.println("[OTA] Falha ao finalizar");
+	});
+	ArduinoOTA.begin();
 
-  Serial.println(WiFi.localIP());
+	//Conecta na rede
+	WiFi.begin(ssid, password);
+	while (WiFi.status() != WL_CONNECTED)
+	{
+		delay(1000);
+		Serial.println("[ESP] Conectando a rede wifi");
+	}
 
-  initWebSocket();
+	Serial.println("[ESP] IP Adquirido:");
+	Serial.println(WiFi.localIP());
 
-  // Route for root / web page
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html, processor);
-  });
+	//Setup do web socket
+	InitWebSocket();
 
-  server.begin();
+	//Definindo a rota padrão para a pagina
+	server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+	{
+		request->send_P(200, "text/html", index_html, Processor);
+	});
+
+	//Iniciando o servidor
+	server.begin();
 }
 
-void loop() {
-  ArduinoOTA.handle();
-  
-  ws.cleanupClients(); // testar um atraso para a chamada
-  digitalWrite(ledPin, ledState);
+void loop()
+{
+	//Gerenciando o OTA
+	ArduinoOTA.handle();
+
+	//Limpa os clientes
+	ws.cleanupClients();
+	
+	//Atualiza o led
+	digitalWrite(ledPin, !ledState);
 }
