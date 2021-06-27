@@ -4,12 +4,24 @@
 #include <ArduinoOTA.h>
 #include "WebPage.h"
 
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+
+const String VERSION = "0.1.4";
+String TIME="NULL"; 
+
 //Configuração da rede
-const char* ssid = "Oliveira oi fibra";
-const char* password = "23121998";
+const char* ssid = "GABRIEL";
+const char* password = "99514334";
 
 bool ledState = LOW;
 const char ledPin = 2;
+
+const char *servidorNTP = "a.st1.ntp.br"; // Servidor NTP para pesquisar a hora
+const int fusoHorario = -10800;           // Fuso horário em segundos (-03h = -10800 seg)
+const int taxaDeAtualizacao = 1800000;    // Taxa de atualização do servidor NTP em milisegundos
+WiFiUDP ntpUDP; // Declaração do Protocolo UDP
+NTPClient timeClient(ntpUDP, servidorNTP, fusoHorario, 60000);
 
 //Configuração do web server (porta 80)
 AsyncWebServer server(80);
@@ -67,19 +79,36 @@ void InitWebSocket()
 	server.addHandler(&ws);
 }
 
-String Processor(const String& var)
-{
-	if(var == "STATE")
-	{
-		if (ledState)
-			return "ON";
-		else
-			return "OFF";
-	}
+String Processor(const String& var){
+  Serial.println(var);
+  if(var == "STATE"){
+    if (ledState){
+      return "ON";
+    }
+    else{
+      return "OFF";
+    }
+  }
+  if(var == "TIME"){
+    return timeClient.getFormattedTime().c_str();
+  }
+  if(var == "VERSION"){
+    return VERSION;
+  }
+  if(var == "RSSI"){
+    return String(WiFi.RSSI());
+  }
+  if(var == "IP"){
+    return WiFi.localIP().toString();
+  }
+  if(var == "MAC"){
+    return WiFi.macAddress().c_str();
+  }
 }
 
 void setup()
 {
+  //WiFi.setHostname("ESP8266");
 	Serial.begin(115200);
   
 	//Setup ESP
@@ -124,6 +153,10 @@ void setup()
 	Serial.println("[ESP] IP Adquirido:");
 	Serial.println(WiFi.localIP());
 
+  timeClient.begin();
+  timeClient.update();
+  Serial.print("Horario atualizado: ");
+  Serial.println(timeClient.getFormattedTime());
 	//Setup do web socket
 	InitWebSocket();
 
