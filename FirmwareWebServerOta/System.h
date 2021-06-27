@@ -13,10 +13,10 @@ typedef struct
 } TaskModel;  
 
 //Array contendo todas as tasks do programa
-extern TaskModel Tasks[];
+extern TaskModel tasks[];
 //Bit para verificar se deve executar o callback da task
-extern volatile unsigned long CallTask;
+extern volatile unsigned long callTask;
 //Quantidade de tasks
-extern const int TasksCount;
+extern const int tasksCount;
 
 #endif

@@ -5,7 +5,6 @@ const char index_html[] PROGMEM = R"rawliteral(
 	<head>
 		<title>ESP Web Server</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script src="https://code.highcharts.com/highcharts.js"></script>
 		<link rel="icon" href="data:,">
 		<style>
 			html
@@ -108,6 +107,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 				<p class="info">HORA: <span id="time">%TIME%</span></p>
 				<p class="info">RSSI: <span id="rssi">%RSSI%</span></p>
 				<p class="info">IP: <span id="ip">%IP%</span></p>
+				<p class="info">MAC: <span id="mac">%MAC%</span></p>
 			</div>
 		</div>
 		<script>
@@ -118,8 +118,8 @@ const char index_html[] PROGMEM = R"rawliteral(
 			{
 				console.log('Trying to open a WebSocket connection...');
 				websocket = new WebSocket(gateway);
-				websocket.onopen    = onOpen;
-				websocket.onclose   = onClose;
+				websocket.onopen = onOpen;
+				websocket.onclose = onClose;
 				websocket.onmessage = onMessage;
 			}
 			function onOpen(event)

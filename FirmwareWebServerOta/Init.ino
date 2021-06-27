@@ -13,5 +13,4 @@ void InitSerial()
 //Setup do arduino
 void InitPinMode()
 {
-	pinMode (LED, OUTPUT);
 }

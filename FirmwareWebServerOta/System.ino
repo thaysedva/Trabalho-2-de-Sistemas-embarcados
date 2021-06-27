@@ -2,23 +2,23 @@
 #include <ESP8266TimerInterrupt.h>
 
 //Bit para verificar se deve executar o callback da task
-volatile unsigned long CallTask;
+volatile unsigned long callTask;
 //Timer0 do esp
-ESP8266Timer Timer;
+ESP8266Timer timer;
 
 //A cada tick do timer subtrai 1 de cada task e atualiza o calltask
 void IRAM_ATTR TimerHandler()
 {
 	unsigned long bitPos = 1;
 
-	for (byte i = 0; i < TasksCount; i++)
+	for (byte i = 0; i < tasksCount; i++)
 	{
-		Tasks[i].currentCounter--;
+		tasks[i].currentCounter--;
 
-		if (!Tasks[i].currentCounter)
+		if (!tasks[i].currentCounter)
 		{
-			Tasks[i].currentCounter = Tasks[i].maxCounter;
-			CallTask = CallTask | bitPos;
+			tasks[i].currentCounter = tasks[i].maxCounter;
+			callTask = callTask | bitPos;
 		}
 
 		bitPos = bitPos << 1;
@@ -32,14 +32,14 @@ void HandleTasks()
 {
 	unsigned long bitPos = 1;
 
-	for (byte i = 0; i < TasksCount; i++)
+	for (byte i = 0; i < tasksCount; i++)
 	{
-		if (CallTask & bitPos)
+		if (callTask & bitPos)
 		{
-			Tasks[i].callback();
+			tasks[i].callback();
 
 			cli();
-			CallTask = CallTask & ~bitPos;
+			callTask = callTask & ~bitPos;
 			sei();
 		}
 		bitPos = bitPos << 1;
@@ -51,6 +51,6 @@ void HandleTasks()
 //Setup do timer
 void InitCountdown(void)
 {
-	Timer.attachInterruptInterval(1000, TimerHandler);
+	timer.attachInterruptInterval(1000, TimerHandler);
 	return;
 }

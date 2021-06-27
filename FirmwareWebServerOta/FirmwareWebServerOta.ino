@@ -4,10 +4,15 @@
 #include <ArduinoOTA.h>
 #include "WebPage.h"
 #include "./System.h"
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 
 //Configuração da rede
-const char* ssid = "Oliveira oi fibra";
-const char* password = "23121998";
+const char* SSID = "Oliveira oi fibra";
+const char* PASSWORD = "23121998";
+
+//Config do firmware
+const String VERSION = "0.1.4";
 
 bool ledState = LOW;
 const char ledPin = 2;
@@ -15,6 +20,17 @@ const char ledPin = 2;
 //Configuração do web server (porta 80)
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
+
+//Configuração NTP
+//Servidor NTP para pesquisar a hora
+const char *servidorNTP = "a.st1.ntp.br";
+//Fuso horário em segundos (-03h = -10800 seg)
+const int fusoHorario = -10800;
+//Taxa de atualização do servidor NTP em milisegundos
+const int taxaDeAtualizacao = 1800000;
+//Declaração do Protocolo UDP
+WiFiUDP ntpUDP;
+NTPClient ntpClient(ntpUDP, servidorNTP, fusoHorario, 60000);
 
 //Envia para todos os clientes o estado atual
 void NotifyClients()
@@ -68,6 +84,13 @@ void InitWebSocket()
 	server.addHandler(&ws);
 }
 
+//Setup NTP
+void InitNtp()
+{
+	ntpClient.begin();
+	ntpClient.update();
+}
+
 String Processor(const String& var)
 {
 	if(var == "STATE")
@@ -77,6 +100,16 @@ String Processor(const String& var)
 		else
 			return "OFF";
 	}
+	else if(var == "TIME")
+		return ntpClient.getFormattedTime().c_str();
+	else if(var == "VERSION")
+		return VERSION;
+	else if(var == "RSSI")
+		return String(WiFi.RSSI());
+	else if(var == "IP")
+		return WiFi.localIP().toString();
+	else if(var == "MAC")
+		return WiFi.macAddress().c_str();
 }
 
 void setup()
@@ -116,7 +149,7 @@ void setup()
 	ArduinoOTA.begin();
 
 	//Conecta na rede
-	WiFi.begin(ssid, password);
+	WiFi.begin(SSID, PASSWORD);
 	while (WiFi.status() != WL_CONNECTED)
 	{
 		delay(1000);
@@ -140,8 +173,12 @@ void setup()
 	
 	//Executa o setup dos pinos
 	InitPinMode();
+	
 	//Inicia o contador das tasks
 	InitCountdown();
+	
+	//Inicia o NTP
+	InitNtp();
 }
 
 void loop()
