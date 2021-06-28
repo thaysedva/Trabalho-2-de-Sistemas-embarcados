@@ -8,14 +8,19 @@
 #include <WiFiUdp.h>
 
 //Configuração da rede
-const char* SSID = "Oliveira oi fibra";
-const char* PASSWORD = "23121998";
+const char* SSID = "LFFT";
+const char* PASSWORD = "galodoido";
 
 //Config do firmware
-const String VERSION = "0.1.4";
+const String VERSION = "0.1.5";
 
-bool ledState = LOW;
-const char ledPin = 2;
+bool ledState1 = LOW;
+bool ledState2 = LOW;
+const char ledPin1 = 2; //Porta Fisica Node MCU D4
+const char ledPin2 = 4; //Porta Fisica Node MCU D2
+
+#define botPin1 13 //Porta Fisica Node MCU D7
+#define botPin2 15 //Porta Fisica Node MCU D8
 
 //Configuração do web server (porta 80)
 AsyncWebServer server(80);
@@ -35,7 +40,7 @@ NTPClient ntpClient(ntpUDP, servidorNTP, fusoHorario, 60000);
 //Envia para todos os clientes o estado atual
 void NotifyClients()
 {
-	ws.textAll(String(ledState));
+	ws.textAll(String(ledState1)+String(ledState2));
 }
 
 //Gerencia os comandos recebidos pelo web socket
@@ -46,11 +51,16 @@ void HandleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 	{
 		data[len] = 0;
 		//Se o comando for toggle, muda o estado do led e notifica todos os clientes
-		if (strcmp((char*)data, "toggle") == 0)
+		if (strcmp((char*)data, "toggle1") == 0)
 		{
-			ledState = !ledState;
+			ledState1 = !ledState1;
 			NotifyClients();
 		}
+   if (strcmp((char*)data, "toggle2") == 0)
+   {
+      ledState2 = !ledState2;
+      NotifyClients();
+    }
 	}
 }
 
@@ -93,13 +103,20 @@ void InitNtp()
 
 String Processor(const String& var)
 {
-	if(var == "STATE")
+	if(var == "STATE1")
 	{
-		if (ledState)
+		if (ledState1)
 			return "ON";
 		else
 			return "OFF";
 	}
+  else if(var == "STATE2")
+  {
+    if (ledState2)
+      return "ON";
+    else
+      return "OFF";    
+  }
 	else if(var == "TIME")
 		return ntpClient.getFormattedTime().c_str();
 	else if(var == "VERSION")
@@ -118,7 +135,11 @@ void setup()
 	InitSerial();
   
 	//Setup ESP
-	pinMode(ledPin, OUTPUT);
+	pinMode(botPin1, INPUT);
+  pinMode(botPin2, INPUT);
+  
+	pinMode(ledPin1, OUTPUT);
+  pinMode(ledPin2, OUTPUT);
   
 	ArduinoOTA.onStart([]() 
 	{
@@ -188,10 +209,17 @@ void loop()
 
 	//Limpa os clientes
 	ws.cleanupClients();
-	
+	if(digitalRead(botPin1)==1){
+    ledState1 = !ledState1;
+    delay(100);
+	}
+  if(digitalRead(botPin2)==1){
+    ledState2 = !ledState2;
+    delay(100);
+  }
 	//Atualiza o led
-	digitalWrite(ledPin, !ledState);
-	
+	digitalWrite(ledPin1, !ledState1);
+  digitalWrite(ledPin2, !ledState2);	
 	//Executa o gerenciamento das tasks
 	HandleTasks();
 }
