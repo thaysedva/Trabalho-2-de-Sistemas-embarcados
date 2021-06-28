@@ -20,6 +20,8 @@ extern volatile unsigned long callTask;
 extern const int tasksCount;
 
 //Flag para atualizar o horario
-extern boolean updateTime;
+extern bool updateTimeFlag;
+//Flag para coletar os dados do sensor
+extern bool readSensorFlag;
 
 #endif

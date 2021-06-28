@@ -12,7 +12,7 @@ const char* SSID = "Oliveira oi fibra";
 const char* PASSWORD = "23121998";
 
 //Config do firmware
-const String VERSION = "0.1.4";
+const String VERSION = "0.2";
 
 bool led1State = LOW;
 bool led2State = LOW;
@@ -49,6 +49,12 @@ void NotifyLed2State()
 void NotifyTime()
 {
 	ws.textAll("{\"time\":\"" + String(ntpClient.getFormattedTime().c_str()) + "\"}");
+}
+
+//Notifica alterações do sensor
+void NotifySensor(int value)
+{
+	ws.textAll("{\"sensor\":\"" + String(value) + "\"}");
 }
 
 //Gerencia os comandos recebidos pelo web socket
@@ -215,9 +221,16 @@ void loop()
 	HandleTasks();
 	
 	//Checa a flag de atualizar o horario
-	if(updateTime)
+	if(updateTimeFlag)
 	{
 		NotifyTime();
-		updateTime = false;
+		updateTimeFlag = false;
+	}
+	
+	//Checa a flag de coletar os dados
+	if(readSensorFlag)
+	{
+		NotifySensor(random(0, 1024));
+		readSensorFlag = false;
 	}
 }

@@ -117,6 +117,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 		<div class="content">
 			<div class="card2">
 				<h2>Analogic Mesurement</h2>
+				<p class="state">LDR: <span id="sensor">0</span></p>
 			</div>
 		</div>
 		<div class="content">
@@ -159,6 +160,8 @@ const char index_html[] PROGMEM = R"rawliteral(
 					document.getElementById('led2').innerHTML = data.led2 == "1" ? "ON" : "OFF";
 				if(data.hasOwnProperty('time'))
 					document.getElementById('time').innerHTML = data.time;
+				if(data.hasOwnProperty('sensor'))
+					document.getElementById('sensor').innerHTML = data.sensor;
 			}
 			function onLoad(event)
 			{
