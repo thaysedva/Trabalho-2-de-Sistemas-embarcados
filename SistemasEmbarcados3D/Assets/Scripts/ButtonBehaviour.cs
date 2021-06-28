@@ -4,6 +4,7 @@ public class ButtonBehaviour : MonoBehaviour
 {
     public WebServerManager WebServerManager;
     public bool on;
+    public string Command;
 
     public void Update()
     {
@@ -22,7 +23,7 @@ public class ButtonBehaviour : MonoBehaviour
     public void OnMouseDown()
     {
         on = true;
-        WebServerManager.SendText("toggle");
+        WebServerManager.SendText(Command);
     }
 
     public void OnMouseUp()

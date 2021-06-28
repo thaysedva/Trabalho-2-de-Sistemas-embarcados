@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using NativeWebSocket;
+using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,7 +14,8 @@ public class WebServerManager : MonoBehaviour
     private WebSocket webSocket;
     private bool isConnected;
 
-    public LedBehaviour Led;
+    public LedBehaviour Led1;
+    public LedBehaviour Led2;
 
     public void Update()
     {
@@ -75,13 +77,24 @@ public class WebServerManager : MonoBehaviour
 
                 webSocket.OnMessage += (bytes) =>
                 {
-                    if (Encoding.UTF8.GetString(bytes) == "1")
+                    var message = Encoding.UTF8.GetString(bytes);
+
+                    var obj = JObject.Parse(message);
+                    var messageArray = obj.ToString().Split('{')[1].Split('}')[0].Replace("\"", "").Trim().Split(':');
+
+                    if (messageArray[0].Trim() == "led1")
                     {
-                        Led.TurnOn();
+                        if (messageArray[1].Trim() == "1")
+                            Led1.TurnOn();
+                        else
+                            Led1.TurnOff();
                     }
-                    else
+                    else if (messageArray[0].Trim() == "led2")
                     {
-                        Led.TurnOff();
+                        if (messageArray[1].Trim() == "1")
+                            Led2.TurnOn();
+                        else
+                            Led2.TurnOff();
                     }
                 };
 

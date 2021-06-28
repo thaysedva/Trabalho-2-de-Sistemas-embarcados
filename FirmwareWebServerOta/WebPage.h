@@ -37,13 +37,26 @@ const char index_html[] PROGMEM = R"rawliteral(
 				padding: 30px;
 				max-width: 600px;
 				margin: 0 auto;
+				display: flex;
+				justify-content: center;
 			}
 			.card
 			{
 				background-color: #F8F7F9;;
 				box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
-				padding-top:10px;
-				padding-bottom:20px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				margin:10px;
+				width: 500px;
+			}
+			.card2
+			{
+				background-color: #F8F7F9;;
+				box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+				padding-top: 10px;
+				padding-bottom: 10px;
+				margin:10px;
+				width: 600px;
 			}
 			.button
 			{
@@ -92,17 +105,22 @@ const char index_html[] PROGMEM = R"rawliteral(
 		<div class="content">
 			<div class="card">
 				<h2>Output - GPIO</h2>
-				<p class="state">state: <span id="state">%STATE%</span></p>
-				<p><button id="button" class="button">Toggle</button></p>
+				<p class="state">Led1: <span id="led1">%LED1%</span></p>
+				<p><button id="buttonLed1" class="button">Toggle</button></p>
+			</div>
+			<div class="card">
+				<h2>Output - GPIO</h2>
+				<p class="state">Led2: <span id="led2">%LED2%</span></p>
+				<p><button id="buttonLed2" class="button">Toggle</button></p>
 			</div>
 		</div>
 		<div class="content">
-			<div class="card">
+			<div class="card2">
 				<h2>Analogic Mesurement</h2>
 			</div>
 		</div>
 		<div class="content">
-			<div class="card">
+			<div class="card2">
 				<p class="info">FW Version: <span id="version">%VERSION%</span></p>
 				<p class="info">HORA: <span id="time">%TIME%</span></p>
 				<p class="info">RSSI: <span id="rssi">%RSSI%</span></p>
@@ -132,17 +150,15 @@ const char index_html[] PROGMEM = R"rawliteral(
 				setTimeout(initWebSocket, 2000);
 			}
 			function onMessage(event)
-			{
-				var state;
-				if (event.data == "1")
-				{
-					state = "ON";
-				}
-				else
-				{
-					state = "OFF";
-				}
-				document.getElementById('state').innerHTML = state;
+			{	
+				var data = JSON.parse(event.data);
+				
+				if(data.hasOwnProperty('led1'))
+					document.getElementById('led1').innerHTML = data.led1 == "1" ? "ON" : "OFF";
+				if(data.hasOwnProperty('led2'))
+					document.getElementById('led2').innerHTML = data.led2 == "1" ? "ON" : "OFF";
+				if(data.hasOwnProperty('time'))
+					document.getElementById('time').innerHTML = data.time;
 			}
 			function onLoad(event)
 			{
@@ -151,11 +167,16 @@ const char index_html[] PROGMEM = R"rawliteral(
 			}
 			function initButton()
 			{
-				document.getElementById('button').addEventListener('click', toggle);
+				document.getElementById('buttonLed1').addEventListener('click', toggleLed1);
+				document.getElementById('buttonLed2').addEventListener('click', toggleLed2);
 			}
-			function toggle()
+			function toggleLed1()
 			{
-				websocket.send('toggle');
+				websocket.send('toggleLed1');
+			}
+			function toggleLed2()
+			{
+				websocket.send('toggleLed2');
 			}
 		</script>
 	</body>

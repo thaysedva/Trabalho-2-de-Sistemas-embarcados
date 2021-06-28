@@ -19,4 +19,7 @@ extern volatile unsigned long callTask;
 //Quantidade de tasks
 extern const int tasksCount;
 
+//Flag para atualizar o horario
+extern boolean updateTime;
+
 #endif
