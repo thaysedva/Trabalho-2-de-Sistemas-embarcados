@@ -22,6 +22,10 @@ const char ledPin2 = 4; //Porta Fisica Node MCU D2
 #define botPin1 13 //Porta Fisica Node MCU D7
 #define botPin2 15 //Porta Fisica Node MCU D8
 
+#define analPin A0 //Porta Fisica Node MCU A0
+
+float analVal = 0.0;
+
 //Configuração do web server (porta 80)
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -140,6 +144,8 @@ void setup()
   
 	pinMode(ledPin1, OUTPUT);
   pinMode(ledPin2, OUTPUT);
+
+  pinMode(analVal, INPUT);
   
 	ArduinoOTA.onStart([]() 
 	{
@@ -211,15 +217,17 @@ void loop()
 	ws.cleanupClients();
 	if(digitalRead(botPin1)==1){
     ledState1 = !ledState1;
-    delay(100);
 	}
   if(digitalRead(botPin2)==1){
     ledState2 = !ledState2;
-    delay(100);
   }
 	//Atualiza o led
 	digitalWrite(ledPin1, !ledState1);
-  digitalWrite(ledPin2, !ledState2);	
+  digitalWrite(ledPin2, !ledState2);
+
+  //Leitura Analógica
+  analVal = map(analogRead(analPin),0,1023,100,0);
+  
 	//Executa o gerenciamento das tasks
 	HandleTasks();
 }
