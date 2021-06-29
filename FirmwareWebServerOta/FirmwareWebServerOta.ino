@@ -120,17 +120,17 @@ String Processor(const String& var)
 {
 	if(var == "LED1")
 		return led1State ? "ON" : "OFF";
-	if(var == "LED2")
+	else if(var == "LED2")
 		return led2State ? "ON" : "OFF";
-	if(var == "TIME")
+	else if(var == "TIME")
 		return ntpClient.getFormattedTime().c_str();
-	if(var == "VERSION")
+	else if(var == "VERSION")
 		return VERSION;
-	if(var == "RSSI")
+	else if(var == "RSSI")
 		return String(WiFi.RSSI());
-	if(var == "IP")
+	else if(var == "IP")
 		return WiFi.localIP().toString();
-	if(var == "MAC")
+	else if(var == "MAC")
 		return WiFi.macAddress().c_str();
 }
 

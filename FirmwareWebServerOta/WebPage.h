@@ -2,6 +2,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML>
 <html>
 	<meta http-equiv="Content-Language" content="pt-br">
+	<script src="https://code.highcharts.com/highcharts.js"></script>
 	<head>
 		<title>ESP Web Server</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -118,6 +119,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 			<div class="card2">
 				<h2>Analogic Mesurement</h2>
 				<p class="state">LDR: <span id="sensor">0</span></p>
+				<div id="chart-sensor" class="container"></div>
 			</div>
 		</div>
 		<div class="content">
@@ -130,6 +132,34 @@ const char index_html[] PROGMEM = R"rawliteral(
 			</div>
 		</div>
 		<script>
+			var chartSensor = new Highcharts.Chart(
+			{
+				chart:{ renderTo : 'chart-sensor' },
+				title: { text: 'LDR values' },
+				series: [
+				{
+					showInLegend: false,
+					data: []
+				}],
+				plotOptions:
+				{
+					line:
+					{
+						animation: false,
+						dataLabels: { enabled: true }
+					},
+					series: { color: '#059e8a' }
+				},
+				xAxis:
+				{
+				},
+				yAxis:
+				{
+					title: { text: 'Analog Value (0 - 1023)' }
+				},
+				credits: { enabled: false }
+			});
+			
 			var gateway = `ws://${window.location.hostname}/ws`;
 			var websocket;
 			window.addEventListener('load', onLoad);
@@ -161,7 +191,17 @@ const char index_html[] PROGMEM = R"rawliteral(
 				if(data.hasOwnProperty('time'))
 					document.getElementById('time').innerHTML = data.time;
 				if(data.hasOwnProperty('sensor'))
+				{
 					document.getElementById('sensor').innerHTML = data.sensor;
+					
+					var x = document.getElementById('time').innerHTML;
+					var y = parseFloat(data.sensor);
+					
+					if(chartSensor.series[0].data.length > 40)
+						chartSensor.series[0].addPoint([x, y], true, true, true);
+					else
+						chartSensor.series[0].addPoint([x, y], true, false, true);
+				}
 			}
 			function onLoad(event)
 			{
