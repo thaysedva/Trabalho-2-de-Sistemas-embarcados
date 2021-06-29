@@ -16,6 +16,8 @@ public class WebServerManager : MonoBehaviour
 
     public LedBehaviour Led1;
     public LedBehaviour Led2;
+    public TMP_Text TimeText;
+    public TMP_Text LdrText;
 
     public void Update()
     {
@@ -77,24 +79,32 @@ public class WebServerManager : MonoBehaviour
 
                 webSocket.OnMessage += (bytes) =>
                 {
-                    var message = Encoding.UTF8.GetString(bytes);
+                    var obj = JObject.Parse(Encoding.UTF8.GetString(bytes));
+                    var message = obj.ToString().Split('{')[1].Split('}')[0].Replace("\"", "").Trim();
+                    var messageType = message.Split(':')[0].Trim();
+                    var messageValue = message.Replace(messageType + ":", "").Trim();
 
-                    var obj = JObject.Parse(message);
-                    var messageArray = obj.ToString().Split('{')[1].Split('}')[0].Replace("\"", "").Trim().Split(':');
-
-                    if (messageArray[0].Trim() == "led1")
+                    if (messageType == "led1")
                     {
-                        if (messageArray[1].Trim() == "1")
+                        if (messageValue == "1")
                             Led1.TurnOn();
                         else
                             Led1.TurnOff();
                     }
-                    else if (messageArray[0].Trim() == "led2")
+                    else if (messageType == "led2")
                     {
-                        if (messageArray[1].Trim() == "1")
+                        if (messageValue == "1")
                             Led2.TurnOn();
                         else
                             Led2.TurnOff();
+                    }
+                    else if (messageType == "time")
+                    {
+                        TimeText.text = "Time: " + messageValue;
+                    }
+                    else if (messageType == "sensor")
+                    {
+                        LdrText.text = "LDR: " + messageValue;
                     }
                 };
 
