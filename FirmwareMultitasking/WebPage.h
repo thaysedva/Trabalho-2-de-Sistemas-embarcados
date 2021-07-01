@@ -1,6 +1,7 @@
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML>
 <html>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta http-equiv="Content-Language" content="pt-br">
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 	<head>
@@ -109,20 +110,22 @@ const char index_html[] PROGMEM = R"rawliteral(
 		</div>
 		<div class="content">
 			<div class="card">
-				<h2>Output - GPIO</h2>
-				<p class="state">Led1: <span id="led1">%LED1%</span></p>
+				<h2>LED1</h2>
+				<img id="icon1" src="http://everaldoprojects.hol.es/LED-OFF.png" height="100px"/>
+				<p class="state"><span id="led1">%LED1%</span></p>
 				<p><button id="buttonLed1" class="button">Toggle</button></p>
 			</div>
 			<div class="card">
-				<h2>Output - GPIO</h2>
-				<p class="state">Led2: <span id="led2">%LED2%</span></p>
+				<h2>LED2</h2>
+				<img id="icon2" src="http://everaldoprojects.hol.es/LED-OFF.png" height="100px"/>
+				<p class="state"><span id="led2">%LED2%</span></p>
 				<p><button id="buttonLed2" class="button">Toggle</button></p>
 			</div>
 		</div>
 		<div class="content">
 			<div class="card2">
-				<h2>Analogic Measurement</h2>
-				<p class="state">LDR: <span id="sensor">0</span></p>
+				<h2>LDR</h2>
+				<p class="state">Leitura atual: <span id="sensor">0</span></p>
 				<div id="chart-sensor" class="container"></div>
 			</div>
 		</div>
@@ -139,7 +142,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 			var chartSensor = new Highcharts.Chart(
 			{
 				chart:{ renderTo : 'chart-sensor' },
-				title: { text: 'LDR values' },
+				title: { text: 'Histórico' },
 				series: [
 				{
 					showInLegend: false,
@@ -159,7 +162,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 				},
 				yAxis:
 				{
-					title: { text: 'Analog Value (0 - 1023)' }
+					title: { text: 'Valor analógico (0 - 1023)' }
 				},
 				credits: { enabled: false }
 			});
@@ -191,9 +194,15 @@ const char index_html[] PROGMEM = R"rawliteral(
 				var data = JSON.parse(event.data);
 				
 				if(data.hasOwnProperty('led1'))
+				{
+					document.getElementById('icon1').src = data.led1 == "1" ? "http://everaldoprojects.hol.es/LED-ON.png" : "http://everaldoprojects.hol.es/LED-OFF.png";
 					document.getElementById('led1').innerHTML = data.led1 == "1" ? "ON" : "OFF";
+				}
 				if(data.hasOwnProperty('led2'))
+				{
+					document.getElementById('icon2').src = data.led2 == "1" ? "http://everaldoprojects.hol.es/LED-ON.png" : "http://everaldoprojects.hol.es/LED-OFF.png";
 					document.getElementById('led2').innerHTML = data.led2 == "1" ? "ON" : "OFF";
+				}
 				if(data.hasOwnProperty('time'))
 					document.getElementById('time').innerHTML = data.time;
 				if(data.hasOwnProperty('sensor'))
