@@ -4,7 +4,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 	<meta http-equiv="Content-Language" content="pt-br">
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 	<head>
-		<title>ESP Web Server</title>
+		<title>Trabalho 2 - Sistemas Embarcados</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="icon" href="data:,">
 		<style>
@@ -99,13 +99,13 @@ const char index_html[] PROGMEM = R"rawliteral(
 				color:#8c8c8c;
 			}
 		</style>
-		<title>ESP Web Server</title>
+		<title>Trabalho 2 - Sistemas Embarcados</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="icon" href="data:,">
 	</head>
 	<body>
 		<div class="topnav">
-			<h1>ESP WebSocket Server</h1>
+			<h1>Trabalho 2 - Sistemas Embarcados</h1>
 		</div>
 		<div class="content">
 			<div class="card">

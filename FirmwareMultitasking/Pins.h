@@ -1,7 +1,7 @@
 #define LED1PIN 2
-#define LED2PIN 3
+#define LED2PIN 5
 
-#define LDRPIN 4
+#define LDRPIN 12
 
-#define BUTTON1PIN 5
-#define BUTTON2PIN 6
+#define BUTTON1PIN 4
+#define BUTTON2PIN 15
