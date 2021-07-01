@@ -7,7 +7,9 @@ Task tasks[] =
 	//Task para atualizar o horario em todos os clientes, executa a cada 1s
 	{SetTimeFlag, 1000, 1000},
 	//Task para coletar os dados do sensor, executa a cada 500ms
-	{ReadSensorData, 500, 500}
+	{ReadSensorData, 500, 500},
+	//Task para ler os botões, executa a cada 50ms
+	{ReadButton, 50, 50}
 };
 
 //Quantidade de tasks
@@ -21,10 +23,18 @@ void SetTimeFlag()
 	return;
 }
 
-//Coleta os dados do sensor
+//Flag para coletar os dados do sensor
 bool readSensorFlag = false;
 void ReadSensorData()
 {
 	readSensorFlag = true;
+	return;
+}
+
+//Flar para ler o estado dos botões
+bool readButtonFlag = false;
+void ReadButton()
+{
+	readButtonFlag = true;
 	return;
 }

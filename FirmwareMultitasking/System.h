@@ -40,5 +40,7 @@ extern NTPClient ntpClient;
 extern bool updateTimeFlag;
 //Flag para coletar os dados do sensor
 extern bool readSensorFlag;
+//Flag para ler os botões
+extern bool readButtonFlag;
 
 #endif

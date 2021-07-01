@@ -89,6 +89,14 @@ void InitOTA()
 //Setup do arduino
 void InitPinMode()
 {
+	//Leds
 	pinMode(LED1PIN, OUTPUT);
 	pinMode(LED2PIN, OUTPUT);
+	
+	//Botões
+	pinMode(BUTTON1PIN, INPUT);
+	pinMode(BUTTON2PIN, INPUT);
+	
+	//LDR
+	pinMode(LDRPIN, INPUT);
 }
