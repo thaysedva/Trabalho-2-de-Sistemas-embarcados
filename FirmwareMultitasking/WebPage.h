@@ -59,6 +59,10 @@ const char index_html[] PROGMEM = R"rawliteral(
 				margin:10px;
 				width: 600px;
 			}
+			.container
+			{
+				display: inline-block;
+			}
 			.button
 			{
 				padding: 15px 50px;
@@ -117,7 +121,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 		</div>
 		<div class="content">
 			<div class="card2">
-				<h2>Analogic Mesurement</h2>
+				<h2>Analogic Measurement</h2>
 				<p class="state">LDR: <span id="sensor">0</span></p>
 				<div id="chart-sensor" class="container"></div>
 			</div>
@@ -159,6 +163,8 @@ const char index_html[] PROGMEM = R"rawliteral(
 				},
 				credits: { enabled: false }
 			});
+			chartSensor.setSize(500, 400);
+			
 			
 			var gateway = `ws://${window.location.hostname}/ws`;
 			var websocket;

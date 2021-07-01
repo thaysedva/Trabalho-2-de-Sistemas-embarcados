@@ -13,17 +13,16 @@ void IRAM_ATTR TimerHandler()
 
 	for (byte i = 0; i < tasksCount; i++)
 	{
-		tasks[i].currentCounter--;
+		tasks[i].downCounter--;
 
-		if (!tasks[i].currentCounter)
+		if (!tasks[i].downCounter)
 		{
-			tasks[i].currentCounter = tasks[i].maxCounter;
+			tasks[i].downCounter = tasks[i].maxCounter;
 			callTask = callTask | bitPos;
 		}
 
 		bitPos = bitPos << 1;
 	}
-	
 	return;
 }
 
@@ -44,7 +43,6 @@ void HandleTasks()
 		}
 		bitPos = bitPos << 1;
 	}
-	
 	return;
 }
 
